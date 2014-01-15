@@ -48,6 +48,14 @@ necessaire
 #include<netdb.h>
 #include<string.h>
 
+#include "tri.h"
+
+typedef struct{
+  char* nomSite;
+  int position;
+  int estampille;
+} Info;
+
 int GetSitePos(int Nbsites, char *argv[]) ;
 void WaitSync(int socket);
 void SendSync(char *site, int Port);
@@ -126,6 +134,133 @@ void SendSync(char *Site, int Port) {
   close (s_emis); 
 }
 
+void requete(char *Site, int Port, Info info){
+  struct hostent* hp;
+  int s_emis;
+  char chaine[15];
+  int longtxt;
+  struct sockaddr_in sock_add_emis;
+  int size_sock;
+  int l;
+  
+  if ( (s_emis=socket(AF_INET, SOCK_STREAM,0))==-1) {
+    perror("Demande : Creation socket");
+    exit(-1);
+  }
+    
+  hp = gethostbyname(Site);
+  if (hp == NULL) {
+    perror("Demande: Gethostbyname");
+    exit(-1);
+  }
+
+  size_sock=sizeof(struct sockaddr_in);
+  sock_add_emis.sin_family = AF_INET;
+  sock_add_emis.sin_port = htons(Port);
+  memcpy(&sock_add_emis.sin_addr.s_addr, hp->h_addr, hp->h_length);
+  
+  if (connect(s_emis, (struct sockaddr*) &sock_add_emis,size_sock)==-1) {
+    perror("Demande : Connect");
+    exit(-1);
+  }
+     
+  sprintf(chaine,"requete %d %d", info.position, info.estampille);
+
+  longtxt =strlen(chaine);
+  /*Emission d'un message de synchro*/
+  l=write(s_emis,chaine,longtxt);
+  close (s_emis); 
+}
+
+void envoyer_message(char *Site, int Port, char* message) {
+  struct hostent* hp;
+  int s_emis;
+  // char chaine[15];
+  int longtxt;
+  struct sockaddr_in sock_add_emis;
+  int size_sock;
+  int l;
+  
+  if ( (s_emis=socket(AF_INET, SOCK_STREAM,0))==-1) {
+    perror("Demande : Creation socket");
+    exit(-1);
+  }
+    
+  hp = gethostbyname(Site);
+  if (hp == NULL) {
+    perror("Demande: Gethostbyname");
+    exit(-1);
+  }
+
+  size_sock=sizeof(struct sockaddr_in);
+  sock_add_emis.sin_family = AF_INET;
+  sock_add_emis.sin_port = htons(Port);
+  memcpy(&sock_add_emis.sin_addr.s_addr, hp->h_addr, hp->h_length);
+  
+  if (connect(s_emis, (struct sockaddr*) &sock_add_emis,size_sock)==-1) {
+    perror("Demande : Connect");
+    exit(-1);
+  }
+     
+  // strcpy(chaine,message);
+
+  longtxt =strlen(message);
+  /*Emission d'un message de synchro*/
+  l=write(s_emis,message,longtxt);
+  close (s_emis);
+} 
+
+/*******************************************************************/
+/********** Gestion de la queue ************************************/
+
+Info derniereValeurQueue(int max, Info* tabInfo){
+  return tabInfo[max];
+}
+
+void enleverQueue(int* max, Info* tabInfo){
+  *max -= 1;
+}
+
+void ajouterQueue(int* max, Info* tabInfo, Info valeur){
+  tabInfo[*max] = valeur;
+  *max += 1; 
+}
+
+void afficherQueue(Info* tabInfo, int max){
+  int i;
+  Info info;
+  for(i=0; i< max; i++){
+    info = tabInfo[i];
+    printf("La position %d contient %d %d\n", i, info.position, info.estampille);
+  }
+}
+
+Info* tri_queue(Info* info, int max){
+  int nombre[max];
+  int i;
+  for(i=0; i< max; i++){
+    nombre[i] = 1000*info[i].estampille + info[i].position;
+  }
+
+  tri_bulle(nombre, max);
+
+  return info;
+}
+
+/*************************************************************************/
+/*************************************************************************/
+
+Info tirage(int NSites, char* argv[], Info info, int* max, Info* tabInfo){
+  
+  return info;
+}
+
+void section_critique(){
+  printf("Je suis dans la section critique\n");
+  sleep(1);
+  printf("Je sors de la section critique\n");
+}
+
 /***********************************************************************/
 /***********************************************************************/
 /***********************************************************************/
@@ -138,7 +273,6 @@ int main (int argc, char* argv[]) {
   char texte[40];
   int i,l;
   float t;
-
   int PortBase=-1; /*Numero du port de la socket a` creer*/
   int NSites=-1; /*Nb total de sites*/
 
@@ -151,6 +285,28 @@ int main (int argc, char* argv[]) {
   /*----Nombre de sites (adresses de machines)---- */
   NSites=argc-2;
 
+
+  /*******************************************************************************
+  ********************************************************************************
+                                 Préparation                   
+  ********************************************************************************
+  *******************************************************************************/
+
+  //La structure de l'info de la requete                               
+  Info info;
+  //Initialiser l'horloge logique
+  info.estampille = 0;
+  //Position de la machine dans la liste
+  info.position = GetSitePos(NSites, argv);
+  //Compteur des réponses pour rentrer en section critique
+  int compteurSC = 0;
+  //La queue des requetes
+  Info* tabInfo = malloc(1000 * sizeof(Info));
+  //Derniere position dans la queue
+  int max=0;
+
+  /*******************************************************************************
+  *******************************************************************************/
 
   /*CREATION&BINDING DE LA SOCKET DE CE SITE*/
   PortBase=atoi(argv[1])+GetSitePos(NSites, argv);
@@ -166,7 +322,7 @@ int main (int argc, char* argv[]) {
   }
 
   if ( bind(s_ecoute,(struct sockaddr*) &sock_add, \
-	    sizeof(struct sockaddr_in))==-1) {
+      sizeof(struct sockaddr_in))==-1) {
     perror("Bind socket");
     exit(-1);
   }
@@ -184,7 +340,7 @@ int main (int argc, char* argv[]) {
       SendSync(argv[3+i], atoi(argv[1])+i+1);
     } else {
       /* Chaque autre site envoie un message au site0 
-	 (1er  dans la liste) pour dire qu'il est lance'*/
+   (1er  dans la liste) pour dire qu'il est lance'*/
       SendSync(argv[2], atoi(argv[1]));
       /*et attend un message du Site 0 envoye' quand tous seront lance's*/
       printf("Wait Synchro du Site 0\n");fflush(0);
@@ -197,8 +353,12 @@ int main (int argc, char* argv[]) {
   /*---------------------------------------*/
   fcntl(s_ecoute,F_SETFL,O_NONBLOCK);
   size_sock=sizeof(struct sockaddr_in);
-  
-  /* Boucle infini*/
+
+  /*******************************************************************************
+  ********************************************************************************
+                                 Boucle infinie                   
+  ********************************************************************************
+  *******************************************************************************/
   while(1) {
   
     /* On commence par tester l'arrivée d'un message */
@@ -207,23 +367,85 @@ int main (int argc, char* argv[]) {
       /*Extraction et affichage du message */
       l=read(s_service,texte,39);
       texte[l] ='\0';
-      printf("Message recu : %s\n",texte); fflush(0);
-      close (s_service);
-    }
-  
+      printf("Message recu : %s\n",texte); 
 
-    /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
-    for(l=0;l<1000000;l++) { 
-      t=t*3;
-      t=t/3;
+      //On augmente l'estampille quand on recoit un message
+      info.estampille++;
     }
+
+    /*******************************************************************************
+    ********************************************************************************
+                      Traiter le message                 
+    ********************************************************************************
+    *******************************************************************************/
+
+    // char first*, second*, third*;
+    // first = strtok(texte, " ");
+    // second = strtok(NULL, " ");
+    // third = strtok(NULL, " ");
+
+    // printf("%s %s %s\n", first, second, third);
+
+
+
+
+
+
+
+
+
+
+      /********* Recevoir une reponse pour rentrer en section critique **************/
+      // if(strcmp(texte, "reponse") == 0){
+      //   compteurSC++;
+
+      //   //Si on a reçu toutes les réponses, alors on s'ajoute soi même dans la queue
+      //   if(compteurSC == NSites-1){
+      //     compteurSC = 0;
+          
+      //     Info derniere = derniereValeurQueue(max,tabInfo);
+      //     if(info.position == derniere.position){
+      //       section_critique();
+      //     }
+      //   }
+      // }      
+
+      /******* Répondre quand recevoir une demande d'entrer en section critique ******/
+    //   char* mess;
+    //   mess = strtok(texte, " ");
+    //   if(strcmp(mess, "requete") == 0){
+    //     Info infoRecue;
+    //     infoRecue.position = atoi(strtok(NULL, " "));
+    //     infoRecue.estampille = atoi(strtok(NULL, " "));
+    //     envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
+    //     //On augmente l'estampille quand on envoit le message
+    //     info.estampille++;
+
+    //     //Quand on reçoit une requête, alors on l'ajoute dans la queue
+    //     if(max < capacite)
+    //       ajouterQueue(&max, tabInfo, infoRecue);
+    //     printf("Une requete a ete ajoutee\n");
+    //     tabInfo = tri_queue(tabInfo, max);
+    //     afficherQueue(tabInfo, max);
+    //   }
+
+    //   close (s_service);
+    // }
+
+    // /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
+    // for(l=0;l<1000000;l++) { 
+    //   t=t*3;
+    //   t=t/3;
+    // }
     
-    printf(".");fflush(0); /* pour montrer que le serveur est actif*/
+    // printf(".");fflush(0); /* pour montrer que le serveur est actif*/
+
+    /******************* Tirage *******************/
+    info = tirage(NSites, argv, info, &max, tabInfo);
+    sleep(1);    
   }
 
 
   close (s_ecoute);  
   return 0;
 }
-
-
