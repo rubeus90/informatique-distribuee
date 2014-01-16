@@ -132,10 +132,10 @@ void SendSync(char *Site, int Port) {
   close (s_emis); 
 }
 
-void requete(char *Site, int Port, Info info){
+void envoyer_message(char *Site, int Port, char* message, Info info) {
   struct hostent* hp;
   int s_emis;
-  char chaine[15];
+  char chaine[30];
   int longtxt;
   struct sockaddr_in sock_add_emis;
   int size_sock;
@@ -162,49 +162,11 @@ void requete(char *Site, int Port, Info info){
     exit(-1);
   }
      
-  sprintf(chaine,"requete %d %d", info.position, info.estampille);
+  sprintf(chaine,"%s %d %d", message, info.position, info.estampille);
 
   longtxt =strlen(chaine);
   /*Emission d'un message de synchro*/
   l=write(s_emis,chaine,longtxt);
-  close (s_emis); 
-}
-
-void envoyer_message(char *Site, int Port, char* message) {
-  struct hostent* hp;
-  int s_emis;
-  // char chaine[15];
-  int longtxt;
-  struct sockaddr_in sock_add_emis;
-  int size_sock;
-  int l;
-  
-  if ( (s_emis=socket(AF_INET, SOCK_STREAM,0))==-1) {
-    perror("Demande : Creation socket");
-    exit(-1);
-  }
-    
-  hp = gethostbyname(Site);
-  if (hp == NULL) {
-    perror("Demande: Gethostbyname");
-    exit(-1);
-  }
-
-  size_sock=sizeof(struct sockaddr_in);
-  sock_add_emis.sin_family = AF_INET;
-  sock_add_emis.sin_port = htons(Port);
-  memcpy(&sock_add_emis.sin_addr.s_addr, hp->h_addr, hp->h_length);
-  
-  if (connect(s_emis, (struct sockaddr*) &sock_add_emis,size_sock)==-1) {
-    perror("Demande : Connect");
-    exit(-1);
-  }
-     
-  // strcpy(chaine,message);
-
-  longtxt =strlen(message);
-  /*Emission d'un message de synchro*/
-  l=write(s_emis,message,longtxt);
   close (s_emis);
 } 
 
@@ -388,7 +350,7 @@ int main (int argc, char* argv[]) {
       int i;
       for(i=0; i<NSites; i++){
         if(i != GetSitePos(NSites, argv)){
-          requete(argv[2+i], atoi(argv[1])+i, info);
+          envoyer_message(argv[2+i], atoi(argv[1])+i, "requete", info);
         }
       }
 
@@ -418,11 +380,7 @@ int main (int argc, char* argv[]) {
       /*Extraction et affichage du message */
       l=read(s_service,texte,39);
       texte[l] ='\0';
-      printf("Message recu : %s\n",texte); 
-
-      //On augmente l'estampille quand on recoit un message
-      info.estampille++;
-    
+      printf("Message recu : %s\n",texte);     
 
       /*******************************************************************************
       ********************************************************************************
@@ -437,6 +395,15 @@ int main (int argc, char* argv[]) {
       m_position = strtok(NULL, " ");
       m_estampille = strtok(NULL, " ");
 
+      //On incremente l'estampille en fonction de l'estampille recue
+      int estampille_recue = atoi(m_estampille);
+      if(info.estampille < estampille_recue){
+        info.estampille = estampille_recue + 1;
+      }
+      else{
+        info.estampille++;
+      }
+
       /*******************************************************************************
       ********************************************************************************
                     Si le message est une demande d'entrer en section critique                 
@@ -450,11 +417,11 @@ int main (int argc, char* argv[]) {
 
         //On ajoute la requete dans la queue
         ajouterQueue(&max, tabInfo, infoRecue);
-        
+        tri_bulle(tabInfo, max);
         afficherQueue(tabInfo, max);
 
         //On envoit un message de reponse
-        envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
+        envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse", info);
         //On augmente l'estampille quand on envoit le message
         info.estampille++;
       }
@@ -477,6 +444,7 @@ int main (int argc, char* argv[]) {
 
       else if(strcmp(m_type, "liberation") == 0){
         enleverQueue(&max, tabInfo);
+        tri_bulle(tabInfo, max);
         afficherQueue(tabInfo, max);
       }
     }
@@ -490,9 +458,6 @@ int main (int argc, char* argv[]) {
     *******************************************************************************/
 
     if(compteurSC == NSites-1){
-
-      tri_bulle(tabInfo, max);
-
       Info derniere = derniereValeurQueue(max,tabInfo); // on recupere la derniere ligne de la queue
 
       if(info.position == derniere.position){
@@ -506,7 +471,7 @@ int main (int argc, char* argv[]) {
         int j;
         for(j=0; j<NSites; j++){
           if(j != GetSitePos(NSites, argv)){
-            envoyer_message(argv[2+j], atoi(argv[1])+j, "liberation");
+            envoyer_message(argv[2+j], atoi(argv[1])+j, "liberation", info);
           }
         }
         //On s'enleve de la queue
