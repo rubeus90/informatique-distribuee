@@ -413,7 +413,7 @@ int main (int argc, char* argv[]) {
       /*Extraction et affichage du message */
       l=read(s_service,texte,39);
       texte[l] ='\0';
-      // printf("Message recu : %s\n",texte); 
+      printf("Message recu : %s\n",texte); 
 
       //On augmente l'estampille quand on recoit un message
       info.estampille++;
