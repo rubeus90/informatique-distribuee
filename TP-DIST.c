@@ -49,7 +49,6 @@ necessaire
 #include<string.h>
 
 typedef struct{
-  char* nomSite;
   int position;
   int estampille;
 } Info;
