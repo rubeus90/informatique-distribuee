@@ -483,14 +483,15 @@ int main (int argc, char* argv[]) {
     *******************************************************************************/
 
     if(compteurSC == NSites-1){
-      Info derniere = derniereValeurQueue(max,tabInfo);
+      Info derniere = derniereValeurQueue(max,tabInfo); // on recupere la derniere ligne de la queue
+
       if(info.position == derniere.position){
         //On remet le compteur des reponses a zero
         compteurSC = 0;
         //On rentre en section_critique
         section_critique();
         //On reactive la possibilite de demande de rentrer en section critique
-        boo = 0;
+        boo = 1;
         //A la sortie, on envoit le message de liberation a toutes les autres machines
         int j;
         for(j=0; j<NSites; j++){
