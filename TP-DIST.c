@@ -373,10 +373,47 @@ int main (int argc, char* argv[]) {
 
     /*******************************************************************************
     ********************************************************************************
+                      Tirage au sort                 
+    ********************************************************************************
+    *******************************************************************************/
+    
+    int random = rand() % 100;
+
+    if(random <80){
+      //On ne fait rien
+    }
+    else if(random >=80 && random <90 && boo){
+      boo = 0;
+      //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
+      int i;
+      for(i=0; i<NSites; i++){
+        if(i != GetSitePos(NSites, argv)){
+          requete(argv[2+i], atoi(argv[1])+i, info);
+        }
+      }
+
+      //On s'ajoute dans la queue d'attente
+      ajouterQueue(&max, tabInfo, info);
+      tri_bulle(tabInfo, max);
+      afficherQueue(tabInfo, max);
+
+      //On incremente l'estampille
+      info.estampille += NSites-1;
+    }
+    else{
+      //On simule un evenement local, donc on augmente l'estampille
+      info.estampille++;
+    }
+
+    
+
+    /*******************************************************************************
+    ********************************************************************************
                       Lire le message recu         
     ********************************************************************************
     *******************************************************************************/
     s_service=accept(s_ecoute,(struct sockaddr*) &sock_add_dist,&size_sock);
+
     if (s_service>0) {
       /*Extraction et affichage du message */
       l=read(s_service,texte,39);
@@ -445,40 +482,6 @@ int main (int argc, char* argv[]) {
       }
     }
 
-    /*******************************************************************************
-    ********************************************************************************
-                      Tirage au sort                 
-    ********************************************************************************
-    *******************************************************************************/
-    else{
-      int random = rand() % 100;
-
-      if(random <80){
-        //On ne fait rien
-      }
-      else if(random >=80 && random <90 && boo){
-        boo = 0;
-        //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
-        int i;
-        for(i=0; i<NSites; i++){
-          if(i != GetSitePos(NSites, argv)){
-            requete(argv[2+i], atoi(argv[1])+i, info);
-          }
-        }
-
-        //On s'ajoute dans la queue d'attente
-        ajouterQueue(&max, tabInfo, info);
-        tri_bulle(tabInfo, max);
-        afficherQueue(tabInfo, max);
-
-        //On incremente l'estampille
-        info.estampille += NSites-1;
-      }
-      else{
-        //On simule un evenement local, donc on augmente l'estampille
-        info.estampille++;
-      }
-    }
     
 
     /*******************************************************************************
