@@ -463,11 +463,16 @@ int main (int argc, char* argv[]) {
 
     /*******************************************************************************
     ********************************************************************************
-                  Si le message est une reponse                 
+          Si on recoit toutes les reponses alors on essaye de rentrer en SC                 
     ********************************************************************************
     *******************************************************************************/
 
-
+    if(compteurSC == NSites-1){
+      Info derniere = derniereValeurQueue(max,tabInfo);
+      if(info.position == derniere.position){
+        section_critique();
+      }
+    }
 
 
       /********* Recevoir une reponse pour rentrer en section critique **************/
