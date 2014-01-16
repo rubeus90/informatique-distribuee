@@ -164,7 +164,7 @@ void envoyer_message(char *Site, int Port, char* message, Info info) {
   sprintf(chaine,"%s %d %d", message, info.position, info.estampille);
 
   longtxt =strlen(chaine);
-  /*Emission d'un message de synchro*/
+  /*Emission du message*/
   l=write(s_emis,chaine,longtxt);
   close (s_emis);
 } 
