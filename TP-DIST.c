@@ -229,10 +229,15 @@ void ajouterQueue(int* max, Info* tabInfo, Info valeur){
 void afficherQueue(Info* tabInfo, int max){
   int i;
   Info info;
+
+  printf("------------------------------\n");
+
   for(i=0; i< max; i++){
     info = tabInfo[i];
-    printf("---------------------------\n La position %d contient %d %d\n ----------------------- \n", i, info.position, info.estampille);
+    printf("La position %d contient %d %d\n", i, info.position, info.estampille);
   }
+  
+  printf("------------------------------\n");
 }
 
 Info* tri_queue(Info* info, int max){
