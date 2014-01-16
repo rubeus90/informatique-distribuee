@@ -450,7 +450,7 @@ int main (int argc, char* argv[]) {
 
         //On ajoute la requete dans la queue
         ajouterQueue(&max, tabInfo, infoRecue);
-        tri_bulle(tabInfo, max);
+        
         afficherQueue(tabInfo, max);
 
         //On envoit un message de reponse
@@ -477,7 +477,6 @@ int main (int argc, char* argv[]) {
 
       else if(strcmp(m_type, "liberation") == 0){
         enleverQueue(&max, tabInfo);
-        tri_bulle(tabInfo, max);
         afficherQueue(tabInfo, max);
       }
     }
@@ -491,6 +490,9 @@ int main (int argc, char* argv[]) {
     *******************************************************************************/
 
     if(compteurSC == NSites-1){
+
+      tri_bulle(tabInfo, max);
+
       Info derniere = derniereValeurQueue(max,tabInfo); // on recupere la derniere ligne de la queue
 
       if(info.position == derniere.position){
