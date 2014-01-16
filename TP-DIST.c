@@ -174,19 +174,16 @@ void envoyer_message(char *Site, int Port, char* message, Info info) {
 /********** Gestion de la queue ************************************/
 
 Info derniereValeurQueue(int max, Info* tabInfo){
-  printf("Derniere Max = %d Position = %d estampille = %d \n", max, tabInfo[max-1].position, tabInfo[max-1].estampille);
   return tabInfo[max-1];
 }
 
 void enleverQueue(int* max, Info* tabInfo){
   *max -= 1;
-  printf("Enlever Max = %d Position = %d estampille = %d \n", *max, tabInfo[*max-1].position, tabInfo[*max-1].estampille);
 }
 
 void ajouterQueue(int* max, Info* tabInfo, Info valeur){
   tabInfo[*max] = valeur;
   *max += 1; 
-  printf("Ajouter Max = %d Position = %d estampille = %d \n", *max, tabInfo[*max-1].position, tabInfo[*max-1].estampille);
 }
 
 void afficherQueue(Info* tabInfo, int max){
@@ -194,10 +191,11 @@ void afficherQueue(Info* tabInfo, int max){
   Info info;
 
   printf("------------------------------\n");
+  printf("La liste d'attente : \n");
 
   for(i=0; i< max; i++){
     info = tabInfo[i];
-    printf("La position %d contient %d %d\n", i, info.position, info.estampille);
+    printf("La position %d contient la machine %d avec l'estampille = %d\n", i, info.position, info.estampille);
   }
 
   printf("------------------------------\n");
