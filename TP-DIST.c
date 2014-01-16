@@ -378,6 +378,7 @@ int main (int argc, char* argv[]) {
       for(i=0; i<NSites; i++){
         if(i != GetSitePos(NSites, argv)){
           requete(argv[2+i], atoi(argv[1])+i, info);
+          info.estampille++;
         }
       }
 
