@@ -508,10 +508,11 @@ int main (int argc, char* argv[]) {
     // }
 
     /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
-    for(l=0;l<1000000;l++) { 
-      t=t*3;
-      t=t/3;
-    }
+    // for(l=0;l<1000000;l++) { 
+    //   t=t*3;
+    //   t=t/3;
+    // }
+    sleep(1);
     
     // printf(".");fflush(0); /* pour montrer que le serveur est actif*/
 
