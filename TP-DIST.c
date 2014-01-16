@@ -309,6 +309,8 @@ int main (int argc, char* argv[]) {
   Info* tabInfo = malloc(1000 * sizeof(Info));
   //Derniere position dans la queue
   int max=0;
+  //Un boolean pour empecher une machine de demander de rentrer en SC 2 fois de suite
+  int boo = 1;
 
   /*******************************************************************************
   *******************************************************************************/
@@ -377,7 +379,8 @@ int main (int argc, char* argv[]) {
     if(random <80){
       //On ne fait rien
     }
-    else if(random >=80 && random <90){
+    else if(random >=80 && random <90 && boo){
+      boo = 0;
       //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
       int i;
       for(i=0; i<NSites; i++){
@@ -486,6 +489,8 @@ int main (int argc, char* argv[]) {
         compteurSC = 0;
         //On rentre en section_critique
         section_critique();
+        //On reactive la possibilite de demande de rentrer en section critique
+        boo = 0;
         //A la sortie, on envoit le message de liberation a toutes les autres machines
         int j;
         for(j=0; j<NSites; j++){
