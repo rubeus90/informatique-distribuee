@@ -213,7 +213,7 @@ void envoyer_message(char *Site, int Port, char* message) {
 
 Info derniereValeurQueue(int max, Info* tabInfo){
   printf("Derniere Max = %d Position = %d estampille = %d \n", max, tabInfo[max-1].position, tabInfo[max-1].estampille);
-  return tabInfo[max];
+  return tabInfo[max-1];
 }
 
 void enleverQueue(int* max, Info* tabInfo){
@@ -463,7 +463,7 @@ int main (int argc, char* argv[]) {
     ********************************************************************************
     *******************************************************************************/
 
-    if(strcmp(m_type, "reponse") == 0){
+    else if(strcmp(m_type, "reponse") == 0){
         compteurSC++;
     }
 
@@ -473,7 +473,7 @@ int main (int argc, char* argv[]) {
     ********************************************************************************
     *******************************************************************************/
 
-    if(strcmp(m_type, "liberation") == 0){
+    else if(strcmp(m_type, "liberation") == 0){
       enleverQueue(&max, tabInfo);
       tri_bulle(tabInfo, max);
       afficherQueue(tabInfo, max);
