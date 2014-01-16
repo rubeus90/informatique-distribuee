@@ -231,7 +231,7 @@ void afficherQueue(Info* tabInfo, int max){
   Info info;
   for(i=0; i< max; i++){
     info = tabInfo[i];
-    printf("La position %d contient %d %d\n", i, info.position, info.estampille);
+    printf("---------------------------\n La position %d contient %d %d\n ----------------------- \n", i, info.position, info.estampille);
   }
 }
 
@@ -404,7 +404,7 @@ int main (int argc, char* argv[]) {
       /*Extraction et affichage du message */
       l=read(s_service,texte,39);
       texte[l] ='\0';
-      printf("Message recu : %s\n",texte); 
+      // printf("Message recu : %s\n",texte); 
 
       //On augmente l'estampille quand on recoit un message
       info.estampille++;
