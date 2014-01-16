@@ -367,12 +367,12 @@ int main (int argc, char* argv[]) {
     ********************************************************************************
     *******************************************************************************/
   
-    int random = rand() % 30;
+    int random = rand() % 50;
 
-    if(random <10){
+    if(random <30){
       //On ne fait rien
     }
-    else if(random >=10 && random <20){
+    else if(random >=30 && random <40){
       //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
       int i;
       for(i=0; i<NSites; i++){
@@ -380,6 +380,10 @@ int main (int argc, char* argv[]) {
           requete(argv[2+i], atoi(argv[1])+i, info);
         }
       }
+
+      //On s'ajoute dans la queue d'attente
+      ajouterQueue(&max, tabInfo, info);
+      afficherQueue(tabInfo, max);
     }
     else{
       //On simule un evenement local, donc on augmente l'estampille
@@ -428,9 +432,9 @@ int main (int argc, char* argv[]) {
       infoRecue.estampille = atoi(m_estampille);
 
       //On ajoute la requete dans la queue
-      // ajouterQueue(&max, tabInfo, infoRecue);
+      ajouterQueue(&max, tabInfo, infoRecue);
       // tri_queue(tabInfo, max);
-      // afficherQueue(tabInfo, max);
+      afficherQueue(tabInfo, max);
 
       //On envoit un message de reponse
       envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
@@ -500,7 +504,7 @@ int main (int argc, char* argv[]) {
       t=t/3;
     }
     
-    printf(".");fflush(0); /* pour montrer que le serveur est actif*/
+    // printf(".");fflush(0); /* pour montrer que le serveur est actif*/
 
     /******************* Tirage *******************/
     // info = tirage(NSites, argv, info, &max, tabInfo);
