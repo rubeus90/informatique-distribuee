@@ -373,41 +373,6 @@ int main (int argc, char* argv[]) {
 
     /*******************************************************************************
     ********************************************************************************
-                      Tirage au sort                 
-    ********************************************************************************
-    *******************************************************************************/
-  
-    int random = rand() % 100;
-
-    if(random <80){
-      //On ne fait rien
-    }
-    else if(random >=80 && random <90 && boo){
-      boo = 0;
-      //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
-      int i;
-      for(i=0; i<NSites; i++){
-        if(i != GetSitePos(NSites, argv)){
-          requete(argv[2+i], atoi(argv[1])+i, info);
-        }
-      }
-
-      //On s'ajoute dans la queue d'attente
-      ajouterQueue(&max, tabInfo, info);
-      tri_bulle(tabInfo, max);
-      afficherQueue(tabInfo, max);
-
-      //On incremente l'estampille
-      info.estampille += NSites-1;
-    }
-    else{
-      //On simule un evenement local, donc on augmente l'estampille
-      info.estampille++;
-    }
-
-
-    /*******************************************************************************
-    ********************************************************************************
                       Lire le message recu         
     ********************************************************************************
     *******************************************************************************/
@@ -420,64 +385,101 @@ int main (int argc, char* argv[]) {
 
       //On augmente l'estampille quand on recoit un message
       info.estampille++;
+    
+
+      /*******************************************************************************
+      ********************************************************************************
+                        Traiter le message                 
+      ********************************************************************************
+      *******************************************************************************/
+
+      char* m_type; 
+      char* m_position;
+      char* m_estampille;
+      m_type = strtok(texte, " ");
+      m_position = strtok(NULL, " ");
+      m_estampille = strtok(NULL, " ");
+
+      /*******************************************************************************
+      ********************************************************************************
+                    Si le message est une demande d'entrer en section critique                 
+      ********************************************************************************
+      *******************************************************************************/
+
+      if(strcmp(m_type, "requete") == 0){
+        Info infoRecue;
+        infoRecue.position = atoi(m_position);
+        infoRecue.estampille = atoi(m_estampille);
+
+        //On ajoute la requete dans la queue
+        ajouterQueue(&max, tabInfo, infoRecue);
+        tri_bulle(tabInfo, max);
+        afficherQueue(tabInfo, max);
+
+        //On envoit un message de reponse
+        envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
+        //On augmente l'estampille quand on envoit le message
+        info.estampille++;
+      }
+
+      /*******************************************************************************
+      ********************************************************************************
+                    Si le message est une reponse                 
+      ********************************************************************************
+      *******************************************************************************/
+
+      else if(strcmp(m_type, "reponse") == 0){
+          compteurSC++;
+      }
+
+      /*******************************************************************************
+      ********************************************************************************
+                    Si le message est un signal de liberation               
+      ********************************************************************************
+      *******************************************************************************/
+
+      else if(strcmp(m_type, "liberation") == 0){
+        enleverQueue(&max, tabInfo);
+        tri_bulle(tabInfo, max);
+        afficherQueue(tabInfo, max);
+      }
     }
 
     /*******************************************************************************
     ********************************************************************************
-                      Traiter le message                 
+                      Tirage au sort                 
     ********************************************************************************
     *******************************************************************************/
+    else{
+      int random = rand() % 100;
 
-    char* m_type; 
-    char* m_position;
-    char* m_estampille;
-    m_type = strtok(texte, " ");
-    m_position = strtok(NULL, " ");
-    m_estampille = strtok(NULL, " ");
+      if(random <80){
+        //On ne fait rien
+      }
+      else if(random >=80 && random <90 && boo){
+        boo = 0;
+        //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
+        int i;
+        for(i=0; i<NSites; i++){
+          if(i != GetSitePos(NSites, argv)){
+            requete(argv[2+i], atoi(argv[1])+i, info);
+          }
+        }
 
-    /*******************************************************************************
-    ********************************************************************************
-                  Si le message est une demande d'entrer en section critique                 
-    ********************************************************************************
-    *******************************************************************************/
+        //On s'ajoute dans la queue d'attente
+        ajouterQueue(&max, tabInfo, info);
+        tri_bulle(tabInfo, max);
+        afficherQueue(tabInfo, max);
 
-    if(strcmp(m_type, "requete") == 0){
-      Info infoRecue;
-      infoRecue.position = atoi(m_position);
-      infoRecue.estampille = atoi(m_estampille);
-
-      //On ajoute la requete dans la queue
-      ajouterQueue(&max, tabInfo, infoRecue);
-      tri_bulle(tabInfo, max);
-      afficherQueue(tabInfo, max);
-
-      //On envoit un message de reponse
-      envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
-      //On augmente l'estampille quand on envoit le message
-      info.estampille++;
+        //On incremente l'estampille
+        info.estampille += NSites-1;
+      }
+      else{
+        //On simule un evenement local, donc on augmente l'estampille
+        info.estampille++;
+      }
     }
-
-    /*******************************************************************************
-    ********************************************************************************
-                  Si le message est une reponse                 
-    ********************************************************************************
-    *******************************************************************************/
-
-    else if(strcmp(m_type, "reponse") == 0){
-        compteurSC++;
-    }
-
-    /*******************************************************************************
-    ********************************************************************************
-                  Si le message est un signal de liberation               
-    ********************************************************************************
-    *******************************************************************************/
-
-    else if(strcmp(m_type, "liberation") == 0){
-      enleverQueue(&max, tabInfo);
-      tri_bulle(tabInfo, max);
-      afficherQueue(tabInfo, max);
-    }
+    
 
     /*******************************************************************************
     ********************************************************************************
