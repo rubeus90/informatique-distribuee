@@ -372,12 +372,12 @@ int main (int argc, char* argv[]) {
     ********************************************************************************
     *******************************************************************************/
   
-    int random = rand() % 50;
+    int random = rand() % 100;
 
-    if(random <30){
+    if(random <80){
       //On ne fait rien
     }
-    else if(random >=30 && random <40){
+    else if(random >=80 && random <90){
       //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
       int i;
       for(i=0; i<NSites; i++){
@@ -458,8 +458,19 @@ int main (int argc, char* argv[]) {
     *******************************************************************************/
 
     if(strcmp(m_type, "reponse") == 0){
-      if(compteurSC <= NSites-1)
         compteurSC++;
+    }
+
+    /*******************************************************************************
+    ********************************************************************************
+                  Si le message est un signal de liberation               
+    ********************************************************************************
+    *******************************************************************************/
+
+    if(strcmp(m_type, "liberation") == 0){
+      enleverQueue(&max, tabInfo);
+      tri_bulle(tabInfo, max);
+      afficherQueue(tabInfo, max);
     }
 
     /*******************************************************************************
@@ -471,18 +482,26 @@ int main (int argc, char* argv[]) {
     if(compteurSC == NSites-1){
       Info derniere = derniereValeurQueue(max,tabInfo);
       if(info.position == derniere.position){
+        //On remet le compteur des reponses a zero
+        compteurSC = 0;
+        //On rentre en section_critique
         section_critique();
+        //A la sortie, on envoit le message de liberation a toutes les autres machines
+        int j;
+        for(j=0; j<NSites; j++){
+          if(j != GetSitePos(NSites, argv)){
+            envoyer_message(argv[2+j], atoi(argv[1])+j, "liberation");
+          }
+        }
+        //On s'enleve de la queue
+        enleverQueue(&max, tabInfo);
+        tri_bulle(tabInfo, max);
+        afficherQueue(tabInfo, max);
       }
     }
 
-    /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
-    // for(l=0;l<1000000;l++) { 
-    //   t=t*3;
-    //   t=t/3;
-    // }
-    sleep(1);
-    
-    // printf(".");fflush(0); /* pour montrer que le serveur est actif*/    
+
+    sleep(1);   
   }
 
 
