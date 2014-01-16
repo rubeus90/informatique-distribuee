@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 /* permutation de deux doubles */
-void permute(int *x, int *y) {
-  double tmp;
+void permute(Info *x, Info *y) {
+  Info tmp;
   tmp = *x;
   *x = *y;
   *y = tmp;
@@ -13,11 +13,11 @@ void permute(int *x, int *y) {
 ***************************************************
 **************************************************/
  
-int tri_bulle(int t[], int n) {
+int tri_bulle(Info* tabInfo, int n) {
   int num_balayage, i;
   for (num_balayage = 1 ; num_balayage < n ; ++num_balayage) /* n-1 balayages */
     for (i = 1 ; i < n ; ++i) /* balayage n°i : n-1 comparaisons */
-      if (t[i] < t[i-1])  /* si deux elements ne sont pas dans l'ordre */
-    	permute(&t[i], &t[i-1]); /* alors on les echange */
+      if ((tabInfo[i].estampille * 1000 + tabInfo[i].position) < (tabInfo[i-1].estampille * 1000 + tabInfo[i-1].position))  /* si deux elements ne sont pas dans l'ordre */
+    	permute(&tabInfo[i], &tabInfo[i-1]); /* alors on les echange */
   return 0;
 }

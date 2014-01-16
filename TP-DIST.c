@@ -48,8 +48,6 @@ necessaire
 #include<netdb.h>
 #include<string.h>
 
-#include "tri.h"
-
 typedef struct{
   char* nomSite;
   int position;
@@ -236,23 +234,25 @@ void afficherQueue(Info* tabInfo, int max){
     info = tabInfo[i];
     printf("La position %d contient %d %d\n", i, info.position, info.estampille);
   }
-  
+
   printf("------------------------------\n");
 }
 
-Info* tri_queue(Info* info, int max){
-  int nombre[max];
-  int i;
-  for(i=0; i< max; i++){
-    nombre[i] = 1000*info[i].estampille + info[i].position;
-  }
-
-  tri_bulle(nombre, max);
-
-  return info;
+void permute(Info *x, Info *y) {
+  Info tmp;
+  tmp = *x;
+  *x = *y;
+  *y = tmp;
 }
-
-
+ 
+int tri_bulle(Info* tabInfo, int n) {
+  int num_balayage, i;
+  for (num_balayage = 1 ; num_balayage < n ; ++num_balayage) /* n-1 balayages */
+    for (i = 1 ; i < n ; ++i) /* balayage n°i : n-1 comparaisons */
+      if ((tabInfo[i].estampille * 1000 + tabInfo[i].position) < (tabInfo[i-1].estampille * 1000 + tabInfo[i-1].position))  /* si deux elements ne sont pas dans l'ordre */
+      permute(&tabInfo[i], &tabInfo[i-1]); /* alors on les echange */
+  return 0;
+}
 
 void section_critique(){
   printf("Je suis dans la section critique\n");
@@ -388,6 +388,7 @@ int main (int argc, char* argv[]) {
 
       //On s'ajoute dans la queue d'attente
       ajouterQueue(&max, tabInfo, info);
+      tri_bulle(tabInfo, max);
       afficherQueue(tabInfo, max);
 
       //On incremente l'estampille
@@ -441,7 +442,7 @@ int main (int argc, char* argv[]) {
 
       //On ajoute la requete dans la queue
       ajouterQueue(&max, tabInfo, infoRecue);
-      // tri_queue(tabInfo, max);
+      tri_bulle(tabInfo, max);
       afficherQueue(tabInfo, max);
 
       //On envoit un message de reponse
