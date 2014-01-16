@@ -212,6 +212,7 @@ void envoyer_message(char *Site, int Port, char* message) {
 /********** Gestion de la queue ************************************/
 
 Info derniereValeurQueue(int max, Info* tabInfo){
+  printf("Max = %d Position = %d estampille = %d \n", max, tabInfo[max].position, tabInfo[max].estampille);
   return tabInfo[max];
 }
 
@@ -220,8 +221,8 @@ void enleverQueue(int* max, Info* tabInfo){
 }
 
 void ajouterQueue(int* max, Info* tabInfo, Info valeur){
-  tabInfo[*max] = valeur;
-  *max += 1; 
+  *max += 1;
+  tabInfo[*max] = valeur; 
 }
 
 void afficherQueue(Info* tabInfo, int max){
@@ -247,8 +248,8 @@ void permute(Info *x, Info *y) {
  
 int tri_bulle(Info* tabInfo, int n) {
   int num_balayage, i;
-  for (num_balayage = 1 ; num_balayage < n ; ++num_balayage) /* n-1 balayages */
-    for (i = 1 ; i < n ; ++i) /* balayage n°i : n-1 comparaisons */
+  for (num_balayage = 0 ; num_balayage < n ; ++num_balayage) /* n-1 balayages */
+    for (i = 0 ; i < n ; ++i) /* balayage n°i : n-1 comparaisons */
       if ((tabInfo[i].estampille * 1000 + tabInfo[i].position) > (tabInfo[i-1].estampille * 1000 + tabInfo[i-1].position))  /* si deux elements ne sont pas dans l'ordre */
       permute(&tabInfo[i], &tabInfo[i-1]); /* alors on les echange */
   return 0;
@@ -308,7 +309,7 @@ int main (int argc, char* argv[]) {
   //La queue des requetes
   Info* tabInfo = malloc(1000 * sizeof(Info));
   //Derniere position dans la queue
-  int max=0;
+  int max=-1;
   //Un boolean pour empecher une machine de demander de rentrer en SC 2 fois de suite
   int boo = 1;
 
