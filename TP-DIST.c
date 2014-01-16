@@ -378,13 +378,15 @@ int main (int argc, char* argv[]) {
       for(i=0; i<NSites; i++){
         if(i != GetSitePos(NSites, argv)){
           requete(argv[2+i], atoi(argv[1])+i, info);
-          info.estampille++;
         }
       }
 
       //On s'ajoute dans la queue d'attente
       ajouterQueue(&max, tabInfo, info);
       afficherQueue(tabInfo, max);
+
+      //On incremente l'estampille
+      info.estampille += NSites-1;
     }
     else{
       //On simule un evenement local, donc on augmente l'estampille
