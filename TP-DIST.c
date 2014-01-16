@@ -458,7 +458,8 @@ int main (int argc, char* argv[]) {
     *******************************************************************************/
 
     if(strcmp(m_type, "reponse") == 0){
-      compteurSC++;
+      if(compteurSC <= NSites-1)
+        compteurSC++;
     }
 
     /*******************************************************************************
@@ -474,44 +475,6 @@ int main (int argc, char* argv[]) {
       }
     }
 
-
-      /********* Recevoir une reponse pour rentrer en section critique **************/
-      // if(strcmp(texte, "reponse") == 0){
-      //   compteurSC++;
-
-      //   //Si on a reçu toutes les réponses, alors on s'ajoute soi même dans la queue
-      //   if(compteurSC == NSites-1){
-      //     compteurSC = 0;
-          
-      //     Info derniere = derniereValeurQueue(max,tabInfo);
-      //     if(info.position == derniere.position){
-      //       section_critique();
-      //     }
-      //   }
-      // }      
-
-      /******* Répondre quand recevoir une demande d'entrer en section critique ******/
-    //   char* mess;
-    //   mess = strtok(texte, " ");
-    //   if(strcmp(mess, "requete") == 0){
-    //     Info infoRecue;
-    //     infoRecue.position = atoi(strtok(NULL, " "));
-    //     infoRecue.estampille = atoi(strtok(NULL, " "));
-    //     envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
-    //     //On augmente l'estampille quand on envoit le message
-    //     info.estampille++;
-
-    //     //Quand on reçoit une requête, alors on l'ajoute dans la queue
-    //     if(max < capacite)
-    //       ajouterQueue(&max, tabInfo, infoRecue);
-    //     printf("Une requete a ete ajoutee\n");
-    //     tabInfo = tri_queue(tabInfo, max);
-    //     afficherQueue(tabInfo, max);
-    //   }
-
-    //   close (s_service);
-    // }
-
     /* Petite boucle d'attente : c'est ici que l'on peut faire des choses*/
     // for(l=0;l<1000000;l++) { 
     //   t=t*3;
@@ -519,11 +482,7 @@ int main (int argc, char* argv[]) {
     // }
     sleep(1);
     
-    // printf(".");fflush(0); /* pour montrer que le serveur est actif*/
-
-    /******************* Tirage *******************/
-    // info = tirage(NSites, argv, info, &max, tabInfo);
-    // sleep(1);    
+    // printf(".");fflush(0); /* pour montrer que le serveur est actif*/    
   }
 
 
