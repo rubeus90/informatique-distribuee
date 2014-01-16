@@ -247,19 +247,19 @@ Info* tri_queue(Info* info, int max){
   return info;
 }
 
-/*************************************************************************/
-/*************************************************************************/
 
-Info tirage(int NSites, char* argv[], Info info, int* max, Info* tabInfo){
-  
-  return info;
-}
 
 void section_critique(){
   printf("Je suis dans la section critique\n");
   sleep(1);
   printf("Je sors de la section critique\n");
 }
+
+
+
+
+
+
 
 /***********************************************************************/
 /***********************************************************************/
@@ -356,12 +356,42 @@ int main (int argc, char* argv[]) {
 
   /*******************************************************************************
   ********************************************************************************
-                                 Boucle infinie                   
+                      Boucle infinie                   
   ********************************************************************************
   *******************************************************************************/
   while(1) {
+
+    /*******************************************************************************
+    ********************************************************************************
+                      Tirage au sort                 
+    ********************************************************************************
+    *******************************************************************************/
   
-    /* On commence par tester l'arrivée d'un message */
+    int random = rand() % 30;
+
+    if(random <10){
+      //On ne fait rien
+    }
+    else if(random >=10 && random <20){
+      //On envoit la demande de rentrer en SC au tout le monde sauf cette machine meme
+      int i;
+      for(i=0; i<NSites; i++){
+        if(i != GetSitePos(NSites, argv)){
+          requete(argv[2+i], atoi(argv[1])+i, info);
+        }
+      }
+    }
+    else{
+      //On simule un evenement local, donc on augmente l'estampille
+      info.estampille++;
+    }
+
+
+    /*******************************************************************************
+    ********************************************************************************
+                      Lire le message recu         
+    ********************************************************************************
+    *******************************************************************************/
     s_service=accept(s_ecoute,(struct sockaddr*) &sock_add_dist,&size_sock);
     if (s_service>0) {
       /*Extraction et affichage du message */
@@ -379,18 +409,50 @@ int main (int argc, char* argv[]) {
     ********************************************************************************
     *******************************************************************************/
 
-    // char first*, second*, third*;
-    // first = strtok(texte, " ");
-    // second = strtok(NULL, " ");
-    // third = strtok(NULL, " ");
+    char* m_type; 
+    char* m_position;
+    char* m_estampille;
+    m_type = strtok(texte, " ");
+    m_position = strtok(NULL, " ");
+    m_estampille = strtok(NULL, " ");
 
-    // printf("%s %s %s\n", first, second, third);
+    /*******************************************************************************
+    ********************************************************************************
+                  Si le message est une demande d'entrer en section critique                 
+    ********************************************************************************
+    *******************************************************************************/
 
+    if(strcmp(m_type, "requete") == 0){
+      Info infoRecue;
+      infoRecue.position = atoi(m_position);
+      infoRecue.estampille = atoi(m_estampille);
 
+      //On ajoute la requete dans la queue
+      // ajouterQueue(&max, tabInfo, infoRecue);
+      // tri_queue(tabInfo, max);
+      // afficherQueue(tabInfo, max);
 
+      //On envoit un message de reponse
+      envoyer_message(argv[2 + infoRecue.position], atoi(argv[1]) + infoRecue.position, "reponse");
+      //On augmente l'estampille quand on envoit le message
+      info.estampille++;
+    }
 
+    /*******************************************************************************
+    ********************************************************************************
+                  Si le message est une reponse                 
+    ********************************************************************************
+    *******************************************************************************/
 
+    if(strcmp(m_type, "reponse") == 0){
+      compteurSC++;
+    }
 
+    /*******************************************************************************
+    ********************************************************************************
+                  Si le message est une reponse                 
+    ********************************************************************************
+    *******************************************************************************/
 
 
 
